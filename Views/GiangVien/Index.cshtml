@@ -1,21 +1,15 @@
-﻿@model IEnumerable<QLTKB.Models.GiangVien>
+@model IEnumerable<QLTKB.Models.GiangVien>
 
 @{
     ViewData["Title"] = "Quản lý giảng viên";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div style="background:white; padding:25px; border-radius:12px;
-    box-shadow:0 2px 10px #00000010;">
-
-    <div style="display:flex; justify-content:space-between;
-        align-items:center; margin-bottom:20px;">
-
+<div class="app-card">
+    <div class="app-header">
         <div>
-            <h2 style="margin:0; color:#263445;">Quản lý giảng viên</h2>
-            <p style="color:#7b8794; margin-top:6px;">
-                Danh sách thông tin giảng viên trong hệ thống
-            </p>
+            <h2>Quản lý giảng viên</h2>
+            <p>Danh sách hồ sơ giảng viên và cán bộ giảng dạy</p>
         </div>
 
         <a asp-action="Create" class="btn btn-primary">
@@ -23,62 +17,80 @@
         </a>
     </div>
 
-    <table class="table table-bordered table-hover">
-        <thead style="background:#2875bb; color:white;">
-            <tr>
-                <th>Mã giảng viên</th>
-                <th>Họ và tên</th>
-                <th>Email</th>
-                <th>Khoa</th>
-                <th>Bộ môn</th>
-                <th>Học vị</th>
-                <th>Số điện thoại</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach (var gv in Model)
-            {
-                <tr>
-                    <td>@gv.MaGiangVien</td>
-                    <td>@gv.TaiKhoan?.HoTen</td>
-                    <td>@gv.TaiKhoan?.Email</td>
-                    <td>@gv.Khoa</td>
-                    <td>@gv.BoMon</td>
-                    <td>@gv.HocVi</td>
-                    <td>@gv.SoDienThoai</td>
-                    <td>
-                        <a asp-action="Edit"
-                           asp-route-id="@gv.GiangVienID"
-                           class="btn btn-warning btn-sm">
-                            Sửa
-                        </a>
-
-                        <form asp-action="Delete"
-                              asp-route-id="@gv.GiangVienID"
-                              method="post"
-                              style="display:inline;"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản giảng viên này không?');">
-
-                            @Html.AntiForgeryToken()
-
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                Xóa
-                            </button>
-                        </form>
-                    </td>
-
-
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    @if (!Model.Any())
+    @if (TempData["Success"] != null)
     {
-        <p style="text-align:center; color:#888;">
-            Chưa có dữ liệu giảng viên.
-        </p>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     }
+
+    <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 13px;">
+        <span>Tổng số giảng viên: <strong class="text-dark">@Model.Count()</strong></span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Mã GV</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Học vị</th>
+                    <th>Khoa</th>
+                    <th>Bộ môn</th>
+                    <th>Số điện thoại</th>
+                    <th style="text-align: right;">Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var gv in Model)
+                    {
+                        <tr>
+                            <td><strong class="text-primary">@gv.MaGiangVien</strong></td>
+                            <td class="fw-semibold">@(gv.TaiKhoan?.HoTen ?? "—")</td>
+                            <td>@(gv.TaiKhoan?.Email ?? "—")</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    @(string.IsNullOrEmpty(gv.HocVi) ? "—" : gv.HocVi)
+                                </span>
+                            </td>
+                            <td>@(gv.Khoa ?? "—")</td>
+                            <td>@(gv.BoMon ?? "—")</td>
+                            <td class="text-muted">@(gv.SoDienThoai ?? "—")</td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                <a asp-action="Edit"
+                                   asp-route-id="@gv.GiangVienID"
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    Sửa
+                                </a>
+
+                                <form asp-action="Delete"
+                                      asp-route-id="@gv.GiangVienID"
+                                      method="post"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản giảng viên này không?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Khóa
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            Chưa có dữ liệu giảng viên trong hệ thống.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

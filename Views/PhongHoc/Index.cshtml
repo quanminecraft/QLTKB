@@ -1,13 +1,17 @@
-﻿@model IEnumerable<QLTKB.Models.PhongHoc>
+@model IEnumerable<QLTKB.Models.PhongHoc>
 
 @{
     ViewData["Title"] = "Quản lý phòng học";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Quản lý phòng học</h2>
+<div class="app-card">
+    <div class="app-header">
+        <div>
+            <h2>Quản lý phòng học</h2>
+            <p>Danh sách giảng đường, phòng thực hành và sức chứa</p>
+        </div>
+
         <a asp-action="Create" class="btn btn-primary">
             + Thêm phòng học
         </a>
@@ -15,106 +19,100 @@
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
+    <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 13px;">
+        <span>Tổng số phòng học: <strong class="text-dark">@(Model?.Count() ?? 0)</strong></span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">STT</th>
+                    <th>Mã phòng</th>
+                    <th>Tên phòng</th>
+                    <th>Tòa nhà</th>
+                    <th class="text-center">Sức chứa</th>
+                    <th>Loại phòng</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align: right;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    int stt = 1;
+                    @foreach (var p in Model)
+                    {
                         <tr>
-                            <th>STT</th>
-                            <th>Mã phòng</th>
-                            <th>Tên phòng</th>
-                            <th>Tòa nhà</th>
-                            <th>Sức chứa</th>
-                            <th>Loại phòng</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <td class="text-muted">@stt</td>
+                            <td><strong class="text-primary">@p.MaPhong</strong></td>
+                            <td class="fw-semibold">@p.TenPhong</td>
+                            <td><span class="badge bg-light text-dark border">@(p.ToaNha ?? "—")</span></td>
+                            <td class="text-center">@p.SucChua chỗ</td>
+                            <td>@(p.LoaiPhong ?? "—")</td>
+                            <td>
+                                @if (p.TrangThai)
+                                {
+                                    <span class="badge-sub badge-sub-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-sub badge-sub-danger">Ngừng hoạt động</span>
+                                }
+                            </td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                @if (p.TrangThai)
+                                {
+                                    <a asp-action="Edit"
+                                       asp-route-id="@p.PhongHocID"
+                                       class="btn btn-sm btn-outline-primary me-1">
+                                        Sửa
+                                    </a>
+
+                                    <form asp-action="Delete"
+                                          asp-route-id="@p.PhongHocID"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn ngừng hoạt động phòng học này?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Khóa
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Restore"
+                                          asp-route-id="@p.PhongHocID"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Bạn có muốn khôi phục phòng học này?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            Khôi phục
+                                        </button>
+                                    </form>
+                                }
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            int stt = 1;
-
-                            @foreach (var p in Model)
-                            {
-                                <tr>
-                                    <td>@stt</td>
-                                    <td>@p.MaPhong</td>
-                                    <td>@p.TenPhong</td>
-                                    <td>@p.ToaNha</td>
-                                    <td>@p.SucChua</td>
-                                    <td>@p.LoaiPhong</td>
-                                    <td>
-                                        @if (p.TrangThai)
-                                        {
-                                            <span class="badge bg-success">Hoạt động</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">Ngừng hoạt động</span>
-                                        }
-                                    </td>
-                                    <td>
-
-                                        @if (p.TrangThai)
-                                        {
-                                            <a asp-action="Edit"
-                                               asp-route-id="@p.PhongHocID"
-                                               class="btn btn-sm btn-warning">
-                                                Sửa
-                                            </a>
-
-                                            <form asp-action="Delete"
-                                                  asp-route-id="@p.PhongHocID"
-                                                  method="post"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('Bạn có chắc chắn muốn ngừng hoạt động phòng học này?');">
-                                                @Html.AntiForgeryToken()
-
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    Ngừng hoạt động
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <form asp-action="Restore"
-                                                  asp-route-id="@p.PhongHocID"
-                                                  method="post"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('Bạn có muốn khôi phục phòng học này?');">
-                                                @Html.AntiForgeryToken()
-
-                                                <button type="submit" class="btn btn-sm btn-success">
-                                                    Khôi phục
-                                                </button>
-                                            </form>
-                                        }
-
-                                    </td>
-                                </tr>
-
-                                stt++;
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center">
-                                    Chưa có phòng học nào.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                        stt++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            Chưa có phòng học nào trong hệ thống.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
-

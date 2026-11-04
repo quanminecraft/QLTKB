@@ -1,219 +1,99 @@
-﻿@model IEnumerable<QLTKB.Models.HocPhan>
+@model IEnumerable<QLTKB.Models.HocPhan>
 
 @{
     ViewData["Title"] = "Quản lý học phần";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
-    .subject-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 22px;
-    }
+<div class="app-card">
+    <div class="app-header">
+        <div>
+            <h2>Quản lý học phần</h2>
+            <p>Danh sách học phần trong chương trình đào tạo</p>
+        </div>
 
-        .subject-header h1 {
-            font-size: 25px;
-            color: #263e59;
-            margin-bottom: 7px;
-        }
-
-        .subject-header p {
-            color: #8491a2;
-            font-size: 14px;
-            margin: 0;
-        }
-
-    .subject-count {
-        color: #66768a;
-        font-size: 14px;
-        margin-bottom: 15px;
-    }
-
-    .subject-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-        .subject-table th {
-            background: #2875bb;
-            color: white;
-            padding: 14px 12px;
-            text-align: left;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .subject-table td {
-            padding: 13px 12px;
-            border-bottom: 1px solid #e8edf3;
-            font-size: 14px;
-            color: #46566b;
-        }
-
-        .subject-table tr:hover {
-            background: #f5f9fd;
-        }
-
-    .status-active {
-        color: #16834b;
-        font-weight: 600;
-    }
-
-    .status-inactive {
-        color: #d33b3b;
-        font-weight: 600;
-    }
-
-    .btn-custom {
-        display: inline-block;
-        padding: 7px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        text-decoration: none;
-        font-weight: 600;
-        margin-right: 4px;
-    }
-
-    .btn-add {
-        background: #2875bb;
-        color: white;
-        padding: 10px 16px;
-        border-radius: 7px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-        .btn-add:hover {
-            background: #1d5e99;
-            color: white;
-        }
-
-    .btn-edit {
-        background: #fff3cd;
-        color: #946c19;
-    }
-
-        .btn-edit:hover {
-            background: #ffe5a0;
-            color: #76530e;
-        }
-
-    .btn-delete {
-        background: #ffe5e5;
-        color: #c0392b;
-    }
-
-        .btn-delete:hover {
-            background: #ffd0d0;
-            color: #a52727;
-        }
-
-    .empty-message {
-        text-align: center;
-        padding: 30px !important;
-        color: #8491a2 !important;
-    }
-
-    .success-message {
-        background: #e7f6ed;
-        color: #16834b;
-        padding: 12px 15px;
-        border-radius: 7px;
-        margin-bottom: 18px;
-    }
-</style>
-
-<div class="subject-header">
-    <div>
-        <h1>Quản lý học phần</h1>
-        <p>Danh sách học phần trong hệ thống QLTKB</p>
+        <a asp-action="Create" class="btn btn-primary">
+            + Thêm học phần mới
+        </a>
     </div>
 
-    <a asp-action="Create" class="btn-add">
-        + Thêm học phần
-    </a>
-</div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-@if (TempData["Success"] != null)
-{
-    <div class="success-message">
-        @TempData["Success"]
+    <div class="d-flex justify-content-between align-items-center mb-3 text-muted" style="font-size: 13px;">
+        <span>Tổng số học phần: <strong class="text-dark">@Model.Count()</strong></span>
     </div>
-}
 
-<div class="subject-count">
-    Tổng số học phần: <strong>@Model.Count()</strong>
-</div>
-
-<table class="subject-table">
-    <thead>
-        <tr>
-            <th>Mã học phần</th>
-            <th>Tên học phần</th>
-            <th>Số tín chỉ</th>
-            <th>Lý thuyết</th>
-            <th>Thực hành</th>
-            <th>Trạng thái</th>
-            <th>Thao tác</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @if (Model.Any())
-        {
-            @foreach (var hp in Model)
-            {
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
                 <tr>
-                    <td>@hp.MaHocPhan</td>
-                    <td>@hp.TenHocPhan</td>
-                    <td>@hp.SoTinChi</td>
-                    <td>@hp.SoTietLyThuyet</td>
-                    <td>@hp.SoTietThucHanh</td>
-
-                    <td>
-                        @if (hp.TrangThai)
-                        {
-                            <span class="status-active">Hoạt động</span>
-                        }
-                        else
-                        {
-                            <span class="status-inactive">Đã khóa</span>
-                        }
-                    </td>
-
-                    <td>
-                        <a asp-action="Edit"
-                           asp-route-id="@hp.HocPhanID"
-                           class="btn-custom btn-edit">
-                            Sửa
-                        </a>
-
-                        @if (hp.TrangThai)
-                        {
-                            <a asp-action="Delete"
-                               asp-route-id="@hp.HocPhanID"
-                               class="btn-custom btn-delete">
-                                Khóa
-                            </a>
-                        }
-                    </td>
+                    <th>Mã học phần</th>
+                    <th>Tên học phần</th>
+                    <th class="text-center">Số TC</th>
+                    <th class="text-center">LT / TH (tiết)</th>
+                    <th>Mô tả</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align: right;">Thao tác</th>
                 </tr>
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="7" class="empty-message">
-                    Chưa có học phần nào trong hệ thống.
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            </thead>
+
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var hp in Model)
+                    {
+                        <tr>
+                            <td><strong class="text-primary">@hp.MaHocPhan</strong></td>
+                            <td class="fw-semibold">@hp.TenHocPhan</td>
+                            <td class="text-center">@hp.SoTinChi</td>
+                            <td class="text-center text-muted">@hp.SoTietLyThuyet / @hp.SoTietThucHanh</td>
+                            <td class="text-muted" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@hp.MoTa">
+                                @(string.IsNullOrEmpty(hp.MoTa) ? "—" : hp.MoTa)
+                            </td>
+                            <td>
+                                @if (hp.TrangThai)
+                                {
+                                    <span class="badge-sub badge-sub-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-sub badge-sub-danger">Đã khóa</span>
+                                }
+                            </td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                <a asp-action="Edit"
+                                   asp-route-id="@hp.HocPhanID"
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    Sửa
+                                </a>
+
+                                @if (hp.TrangThai)
+                                {
+                                    <a asp-action="Delete"
+                                       asp-route-id="@hp.HocPhanID"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Khóa
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            Chưa có dữ liệu học phần trong hệ thống.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
